@@ -1,0 +1,13 @@
+{
+	auto_https off
+}
+
+:3000 {
+	log {
+		output stderr
+	}
+	handle {
+		header Cache-Control "no-cache"
+		file_server
+	}
+}
