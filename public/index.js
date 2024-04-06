@@ -1,3 +1,5 @@
+"use strict";
+
 function renderChart(elementID, title, yAxis, series) {
   Highcharts.chart(elementID, {
     chart: {
