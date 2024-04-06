@@ -6,7 +6,14 @@
 	log {
 		output stderr
 	}
+	handle /target/* {
+		root * target
+		uri strip_prefix /target
+		header Cache-Control "no-cache"
+		file_server
+	}
 	handle {
+		root * public
 		header Cache-Control "no-cache"
 		file_server
 	}

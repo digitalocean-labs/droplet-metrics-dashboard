@@ -30,7 +30,7 @@ function renderChart(elementID, title, yAxis, series) {
 }
 
 function fetchJson(url) {
-  return fetch(url, { cache: "no-cache" }).then((res) => {
+  return fetch(url).then((res) => {
     if (res.ok) {
       return res.json();
     }
@@ -52,7 +52,7 @@ function bandwidthMetrics(dropletName, metricsUrl) {
 
 function inboundMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const url = `target/bandwidth-inbound-${droplet["id"]}.json`;
+    const url = `/target/bandwidth-inbound-${droplet["id"]}.json`;
     return bandwidthMetrics(droplet["name"], url);
   });
   Promise.all(dropletMetrics).then((series) => {
@@ -65,7 +65,7 @@ function inboundMetrics(droplets) {
 
 function outboundMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const url = `target/bandwidth-outbound-${droplet["id"]}.json`;
+    const url = `/target/bandwidth-outbound-${droplet["id"]}.json`;
     return bandwidthMetrics(droplet["name"], url);
   });
   Promise.all(dropletMetrics).then((series) => {
@@ -78,7 +78,7 @@ function outboundMetrics(droplets) {
 
 function cpuUsageMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const url = `target/cpu-${droplet["id"]}.json`;
+    const url = `/target/cpu-${droplet["id"]}.json`;
     return fetchJson(url).then((data) => {
       const ticks = new Map();
       data["data"]["result"].forEach((res) => {
@@ -123,8 +123,8 @@ function cpuUsageMetrics(droplets) {
 
 function memoryUsageMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const freeReq = fetchJson(`target/memory-free-${droplet["id"]}.json`);
-    const totalReq = fetchJson(`target/memory-total-${droplet["id"]}.json`);
+    const freeReq = fetchJson(`/target/memory-free-${droplet["id"]}.json`);
+    const totalReq = fetchJson(`/target/memory-total-${droplet["id"]}.json`);
     return Promise.all([freeReq, totalReq]).then((data) => {
       const freeValues = data[0]["data"]["result"][0]["values"];
       const totalValues = data[1]["data"]["result"][0]["values"];
@@ -150,7 +150,7 @@ function memoryUsageMetrics(droplets) {
   });
 }
 
-fetchJson("target/droplets.json").then((droplets) => {
+fetchJson("/target/droplets.json").then((droplets) => {
   inboundMetrics(droplets);
   outboundMetrics(droplets);
   cpuUsageMetrics(droplets);
