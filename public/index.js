@@ -31,6 +31,11 @@ function renderChart(elementID, title, yAxis, series) {
   });
 }
 
+function reportError(elementID, error) {
+  console.error(elementID, error);
+  document.getElementById(elementID).innerText = error.toString();
+}
+
 function fetchJson(url) {
   return fetch(url).then((res) => {
     if (res.ok) {
@@ -60,8 +65,7 @@ function inboundMetrics(droplets) {
   Promise.all(dropletMetrics).then((series) => {
     renderChart("bandwidth-inbound", "Droplet Bandwidth (public, inbound)", "Bandwidth (Mbps)", series);
   }).catch((error) => {
-    const div = document.getElementById("bandwidth-inbound");
-    div.innerText = error.toString();
+    reportError("bandwidth-inbound", error);
   });
 }
 
@@ -73,8 +77,7 @@ function outboundMetrics(droplets) {
   Promise.all(dropletMetrics).then((series) => {
     renderChart("bandwidth-outbound", "Droplet Bandwidth (public, outbound)", "Bandwidth (Mbps)", series);
   }).catch((error) => {
-    const div = document.getElementById("bandwidth-outbound");
-    div.innerText = error.toString();
+    reportError("bandwidth-outbound", error);
   });
 }
 
@@ -118,8 +121,7 @@ function cpuUsageMetrics(droplets) {
   Promise.all(dropletMetrics).then((series) => {
     renderChart("cpu-usage", "CPU Usage", "Used %", series);
   }).catch((error) => {
-    const div = document.getElementById("cpu-usage");
-    div.innerText = error.toString();
+    reportError("cpu-usage", error);
   });
 }
 
@@ -147,8 +149,7 @@ function memoryUsageMetrics(droplets) {
   Promise.all(dropletMetrics).then((series) => {
     renderChart("memory-usage", "Memory Usage", "Used %", series);
   }).catch((error) => {
-    const div = document.getElementById("memory-usage");
-    div.innerText = error.toString();
+    reportError("memory-usage", error);
   });
 }
 
@@ -158,6 +159,5 @@ fetchJson("/data/droplets.json").then((droplets) => {
   cpuUsageMetrics(droplets);
   memoryUsageMetrics(droplets);
 }).catch((error) => {
-  const div = document.getElementById("container");
-  div.innerText = error.toString();
+  reportError("container", error);
 });
