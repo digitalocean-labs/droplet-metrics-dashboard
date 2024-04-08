@@ -45,22 +45,22 @@ function fetchJson(url) {
   });
 }
 
-function bandwidthMetrics(dropletName, metricsUrl) {
-  return fetchJson(metricsUrl).then((metrics) => {
-    const values = metrics["data"]["result"][0]["values"].map((value) => {
-      return [value[0] * 1000, parseFloat(value[1])];
-    });
-    return {
-      name: dropletName,
-      data: values,
-    };
+function bandwidthSeries(dropletName, data) {
+  const values = data["data"]["result"][0]["values"].map((value) => {
+    return [value[0] * 1000, parseFloat(value[1])];
   });
+  return {
+    name: dropletName,
+    data: values,
+  };
 }
 
 function inboundMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
     const url = `/data/bandwidth-inbound-${droplet["id"]}.json`;
-    return bandwidthMetrics(droplet["name"], url);
+    return fetchJson(url).then((data) => {
+      return bandwidthSeries(droplet["name"], data);
+    });
   });
   Promise.all(dropletMetrics).then((series) => {
     renderChart("bandwidth-inbound", "Droplet Bandwidth (public, inbound)", "Bandwidth (Mbps)", series);
@@ -72,7 +72,9 @@ function inboundMetrics(droplets) {
 function outboundMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
     const url = `/data/bandwidth-outbound-${droplet["id"]}.json`;
-    return bandwidthMetrics(droplet["name"], url);
+    return fetchJson(url).then((data) => {
+      return bandwidthSeries(droplet["name"], data);
+    });
   });
   Promise.all(dropletMetrics).then((series) => {
     renderChart("bandwidth-outbound", "Droplet Bandwidth (public, outbound)", "Bandwidth (Mbps)", series);
@@ -81,41 +83,45 @@ function outboundMetrics(droplets) {
   });
 }
 
+function usedCpuSeries(dropletName, data) {
+  const ticks = new Map();
+  data["data"]["result"].forEach((res) => {
+    const mode = res["metric"]["mode"];
+    res["values"].forEach((value) => {
+      const tick = value[0] * 1000;
+      const metric = parseFloat(value[1]);
+      if (ticks.has(tick)) {
+        const metrics = ticks.get(tick);
+        metrics.set(mode, metric);
+      } else {
+        const metrics = new Map();
+        metrics.set(mode, metric);
+        ticks.set(tick, metrics);
+      }
+    });
+  });
+  const series = [];
+  for (const tick of ticks.keys()) {
+    const metrics = ticks.get(tick);
+    const idleCpu = metrics.get("idle");
+    let totalCpu = 0;
+    for (const metric of metrics.values()) {
+      totalCpu = totalCpu + metric;
+    }
+    const usedCpu = (totalCpu - idleCpu) / totalCpu * 100.0;
+    series.push([tick, usedCpu]);
+  }
+  return {
+    name: dropletName,
+    data: series,
+  };
+}
+
 function cpuUsageMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
     const url = `/data/cpu-${droplet["id"]}.json`;
     return fetchJson(url).then((data) => {
-      const ticks = new Map();
-      data["data"]["result"].forEach((res) => {
-        const mode = res["metric"]["mode"];
-        res["values"].forEach((value) => {
-          const tick = value[0] * 1000;
-          const metric = parseFloat(value[1]);
-          if (ticks.has(tick)) {
-            const metrics = ticks.get(tick);
-            metrics.set(mode, metric);
-          } else {
-            const metrics = new Map();
-            metrics.set(mode, metric);
-            ticks.set(tick, metrics);
-          }
-        });
-      });
-      const series = [];
-      for (const tick of ticks.keys()) {
-        const metrics = ticks.get(tick);
-        const idleCpu = metrics.get("idle");
-        let totalCpu = 0;
-        for (const metric of metrics.values()) {
-          totalCpu = totalCpu + metric;
-        }
-        const usedCpu = (totalCpu - idleCpu) / totalCpu * 100.0;
-        series.push([tick, usedCpu]);
-      }
-      return {
-        name: droplet["name"],
-        data: series,
-      };
+      return usedCpuSeries(droplet["name"], data);
     });
   });
   Promise.all(dropletMetrics).then((series) => {
@@ -125,25 +131,29 @@ function cpuUsageMetrics(droplets) {
   });
 }
 
+function usedMemorySeries(dropletName, freeData, totalData) {
+  const freeValues = freeData["data"]["result"][0]["values"];
+  const totalValues = totalData["data"]["result"][0]["values"];
+  const series = []
+  for (let i = 0; i < freeValues.length; i++) {
+    const tick = freeValues[i][0] * 1000;
+    const freeMem = parseFloat(freeValues[i][1]);
+    const totalMem = parseFloat(totalValues[i][1]);
+    const usedMem = (totalMem - freeMem) / totalMem * 100.0;
+    series.push([tick, usedMem]);
+  }
+  return {
+    name: dropletName,
+    data: series,
+  };
+}
+
 function memoryUsageMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
     const freeReq = fetchJson(`/data/memory-free-${droplet["id"]}.json`);
     const totalReq = fetchJson(`/data/memory-total-${droplet["id"]}.json`);
     return Promise.all([freeReq, totalReq]).then((data) => {
-      const freeValues = data[0]["data"]["result"][0]["values"];
-      const totalValues = data[1]["data"]["result"][0]["values"];
-      const series = []
-      for (let i = 0; i < freeValues.length; i++) {
-        const tick = freeValues[i][0] * 1000;
-        const freeMem = parseFloat(freeValues[i][1]);
-        const totalMem = parseFloat(totalValues[i][1]);
-        const usedMem = (totalMem - freeMem) / totalMem * 100.0;
-        series.push([tick, usedMem]);
-      }
-      return {
-        name: droplet["name"],
-        data: series,
-      };
+      return usedMemorySeries(droplet["name"], data[0], data[1]);
     });
   });
   Promise.all(dropletMetrics).then((series) => {
