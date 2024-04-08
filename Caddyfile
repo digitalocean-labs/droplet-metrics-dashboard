@@ -6,9 +6,8 @@
 	log {
 		output stderr
 	}
-	handle /data/* {
+	handle_path /data/* {
 		root * data
-		uri strip_prefix /data
 		header Cache-Control "no-cache"
 		file_server
 	}
