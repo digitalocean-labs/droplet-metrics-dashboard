@@ -215,17 +215,17 @@ function memoryUsageMetrics(droplets) {
   });
 }
 
-let pageTagName = null;
+let tagName = null;
 let refreshMinutes = 0;
 const pageQuery = window.location.search;
 if (!!pageQuery) {
   const pageParams = new URLSearchParams(pageQuery);
-  pageTagName = pageParams.get("tag");
+  tagName = pageParams.get("tag");
   const refreshTxt = pageParams.get("refresh");
   refreshMinutes = (!!refreshTxt) ? parseInt(refreshTxt) : 0;
 }
-if (!!pageTagName) {
-  fetchJson("droplets", pageTagName).then((droplets) => {
+if (!!tagName) {
+  fetchJson("droplets", tagName).then((droplets) => {
     inboundMetrics(droplets);
     outboundMetrics(droplets);
     cpuUsageMetrics(droplets);
