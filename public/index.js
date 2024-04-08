@@ -36,8 +36,63 @@ function reportError(elementID, error) {
   document.getElementById(elementID).innerText = error.toString();
 }
 
-function fetchJson(url) {
-  return fetch(url).then((res) => {
+function newSearchUnixTime(hours) {
+  let millis = Date.now();
+  if (hours > 0) {
+    millis = millis - (hours * 60 * 60 * 1000);
+  }
+  return (millis / 1000).toFixed(0);
+}
+
+const searchEnd = newSearchUnixTime(0); // now
+const searchStart = newSearchUnixTime(1); // 1 hour ago
+
+function fetchJson(searchType, searchArg) {
+  let searchUrl = "";
+  const query = new URLSearchParams();
+  switch (searchType) {
+    case "droplets":
+      query.set("tag_name", searchArg);
+      searchUrl = "/v2/droplets";
+      break;
+    case "bandwidth-inbound":
+      query.set("host_id", searchArg.toString());
+      query.set("interface", "public");
+      query.set("direction", "inbound");
+      query.set("start", searchStart);
+      query.set("end", searchEnd);
+      searchUrl = "/v2/monitoring/metrics/droplet/bandwidth";
+      break;
+    case "bandwidth-outbound":
+      query.set("host_id", searchArg.toString());
+      query.set("interface", "public");
+      query.set("direction", "outbound");
+      query.set("start", searchStart);
+      query.set("end", searchEnd);
+      searchUrl = "/v2/monitoring/metrics/droplet/bandwidth";
+      break;
+    case "cpu-usage":
+      query.set("host_id", searchArg.toString());
+      query.set("start", searchStart);
+      query.set("end", searchEnd);
+      searchUrl = "/v2/monitoring/metrics/droplet/cpu";
+      break;
+    case "memory-free":
+      query.set("host_id", searchArg.toString());
+      query.set("start", searchStart);
+      query.set("end", searchEnd);
+      searchUrl = "/v2/monitoring/metrics/droplet/memory_free";
+      break;
+    case "memory-total":
+      query.set("host_id", searchArg.toString());
+      query.set("start", searchStart);
+      query.set("end", searchEnd);
+      searchUrl = "/v2/monitoring/metrics/droplet/memory_total";
+      break;
+    default:
+      return Promise.reject(new Error(`Unknown search type: "${searchType}"`));
+  }
+  return fetch(`${searchUrl}?${query}`).then((res) => {
     if (res.ok) {
       return res.json();
     }
@@ -57,8 +112,7 @@ function bandwidthSeries(dropletName, data) {
 
 function inboundMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const url = `/data/bandwidth-inbound-${droplet["id"]}.json`;
-    return fetchJson(url).then((data) => {
+    return fetchJson("bandwidth-inbound", droplet["id"]).then((data) => {
       return bandwidthSeries(droplet["name"], data);
     });
   });
@@ -71,8 +125,7 @@ function inboundMetrics(droplets) {
 
 function outboundMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const url = `/data/bandwidth-outbound-${droplet["id"]}.json`;
-    return fetchJson(url).then((data) => {
+    return fetchJson("bandwidth-outbound", droplet["id"]).then((data) => {
       return bandwidthSeries(droplet["name"], data);
     });
   });
@@ -119,8 +172,7 @@ function usedCpuSeries(dropletName, data) {
 
 function cpuUsageMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const url = `/data/cpu-${droplet["id"]}.json`;
-    return fetchJson(url).then((data) => {
+    return fetchJson("cpu-usage", droplet["id"]).then((data) => {
       return usedCpuSeries(droplet["name"], data);
     });
   });
@@ -150,8 +202,8 @@ function usedMemorySeries(dropletName, freeData, totalData) {
 
 function memoryUsageMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const freeReq = fetchJson(`/data/memory-free-${droplet["id"]}.json`);
-    const totalReq = fetchJson(`/data/memory-total-${droplet["id"]}.json`);
+    const freeReq = fetchJson("memory-free", droplet["id"]);
+    const totalReq = fetchJson("memory-total", droplet["id"]);
     return Promise.all([freeReq, totalReq]).then((data) => {
       return usedMemorySeries(droplet["name"], data[0], data[1]);
     });
@@ -163,11 +215,31 @@ function memoryUsageMetrics(droplets) {
   });
 }
 
-fetchJson("/data/droplets.json").then((droplets) => {
-  inboundMetrics(droplets);
-  outboundMetrics(droplets);
-  cpuUsageMetrics(droplets);
-  memoryUsageMetrics(droplets);
-}).catch((error) => {
+let pageTagName = null;
+let refreshMinutes = 0;
+const pageQuery = window.location.search;
+if (!!pageQuery) {
+  const pageParams = new URLSearchParams(pageQuery);
+  pageTagName = pageParams.get("tag");
+  const refreshTxt = pageParams.get("refresh");
+  refreshMinutes = (!!refreshTxt) ? parseInt(refreshTxt) : 0;
+}
+if (!!pageTagName) {
+  fetchJson("droplets", pageTagName).then((droplets) => {
+    inboundMetrics(droplets);
+    outboundMetrics(droplets);
+    cpuUsageMetrics(droplets);
+    memoryUsageMetrics(droplets);
+  }).catch((error) => {
+    reportError("container", error);
+  });
+  if (!isNaN(refreshMinutes) && refreshMinutes > 0) {
+    const reloadMillis = refreshMinutes * 60 * 1000;
+    window.setTimeout(function () {
+      window.location.reload();
+    }, reloadMillis);
+  }
+} else {
+  const error = new Error("Missing 'tag' parameter");
   reportError("container", error);
-});
+}
