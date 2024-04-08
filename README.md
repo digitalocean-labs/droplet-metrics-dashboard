@@ -15,7 +15,7 @@ Serve fetched metrics using a local http server ([Caddy](https://caddyserver.com
 View your collected metrics at http://localhost:3000/
 
 > [!TIP]
-> If you would like to avoid fetching metrics with curl and jq you may be interested in the [nocache](/digitalocean-labs/droplet-metrics-dashboard/tree/nocache) branch that uses Caddy server's reverse-proxy capabilities to fetch metrics directly from DigitalOcean's Public API.
+> If you would like to avoid fetching metrics with curl and jq you may be interested in the [nocache](https://github.com/digitalocean-labs/droplet-metrics-dashboard/tree/nocache) branch that uses Caddy server's reverse-proxy capabilities to fetch metrics directly from DigitalOcean's Public API.
 
 ## Example
 
