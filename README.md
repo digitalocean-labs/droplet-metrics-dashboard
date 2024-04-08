@@ -1,5 +1,8 @@
 # Droplet Metrics Dashboard
 
+> [!WARNING]
+> We do NOT recommend running this configuration over the internet without any access controls. Your infrastructure is confidential and it's details should not be easily accessible by unauthorised individuals.
+
 Use DigitalOcean's [Public API](https://docs.digitalocean.com/reference/api/api-reference/) to fetch metrics for [tagged droplets](https://www.digitalocean.com/blog/droplet-tagging-organize-your-infrastructure).
 
 Serve fetched metrics using a local http server ([Caddy](https://caddyserver.com/docs/)), rendered into graphs using [Highcharts](https://www.highcharts.com/docs/chart-and-series-types/line-chart):
