@@ -9,11 +9,11 @@ export DIGITALOCEAN_TOKEN='[REDACTED]'
 ./serve.sh
 ```
 
+Your metrics for droplets tagged with a given tag will be available at http://localhost:3000/index.html?tag=YOUR_TAG
+
 Available query parameters:
 * `tag` applied to your droplets (MANDATORY)
 * `refresh` metrics every X minutes (OPTIONAL)
-
-For example, to view metrics for droplets tagged with `wibble`, refreshed every 5 minutes, you would use this following URL: http://localhost:3000/index.html?tag=wibble&refresh=5
 
 ## Example
 
