@@ -11,7 +11,7 @@ curl --silent --show-error --fail \
   --header "Authorization: Bearer ${DIGITALOCEAN_TOKEN}" \
   --url-query "tag_name=${TAG_NAME}" \
   "https://api.digitalocean.com/v2/droplets" \
-  | jq '.' > data/droplets.json
+  | jq '[.droplets[] | {"id": .id, "name": .name}] | {"droplets": .}' > data/droplets.json
 
 start_ts="$(date -v-1H +%s)"
 end_ts="$(date +%s)"
