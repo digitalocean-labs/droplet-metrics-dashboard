@@ -96,12 +96,12 @@ function fetchJson(searchType, searchArg) {
     if (res.ok) {
       return res.json();
     }
-    throw new Error(`${res.status} ${res.statusText}\n${res.url}`)
+    throw new Error(`${res.status} ${res.statusText}\n${res.url}`);
   });
 }
 
 function noResults(data) {
-  return data["data"]["result"].length === 0
+  return data["data"]["result"].length === 0;
 }
 
 function bandwidthSeries(dropletName, data) {
