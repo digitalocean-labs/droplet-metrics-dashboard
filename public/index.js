@@ -45,7 +45,17 @@ function fetchJson(url) {
   });
 }
 
+function noResults(data) {
+  return data["data"]["result"].length === 0
+}
+
 function bandwidthSeries(dropletName, data) {
+  if (noResults(data)) {
+    return {
+      name: dropletName,
+      data: [],
+    };
+  }
   const values = data["data"]["result"][0]["values"].map((value) => {
     return [value[0] * 1000, parseFloat(value[1])];
   });
@@ -84,6 +94,12 @@ function outboundMetrics(droplets) {
 }
 
 function usedCpuSeries(dropletName, data) {
+  if (noResults(data)) {
+    return {
+      name: dropletName,
+      data: [],
+    };
+  }
   const ticks = new Map();
   data["data"]["result"].forEach((res) => {
     const mode = res["metric"]["mode"];
@@ -132,6 +148,12 @@ function cpuUsageMetrics(droplets) {
 }
 
 function usedMemorySeries(dropletName, freeData, totalData) {
+  if (noResults(freeData) || noResults(totalData)) {
+    return {
+      name: dropletName,
+      data: [],
+    };
+  }
   const freeValues = freeData["data"]["result"][0]["values"];
   const totalValues = totalData["data"]["result"][0]["values"];
   const series = []
