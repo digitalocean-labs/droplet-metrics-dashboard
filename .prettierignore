@@ -1,5 +1,5 @@
 bin
 data
-highcharts.js
+*.min.js
 *.html
 *.md
