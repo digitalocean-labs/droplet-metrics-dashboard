@@ -10,6 +10,7 @@ curl --silent --show-error --fail \
   --header "Accept: application/json" \
   --header "Authorization: Bearer ${DIGITALOCEAN_TOKEN}" \
   --url-query "tag_name=${TAG_NAME}" \
+  --url-query "per_page=200" \
   "https://api.digitalocean.com/v2/droplets" \
   | jq '[.droplets[] | {"id": .id, "name": .name}] | {"droplets": .}' > data/droplets.json
 
