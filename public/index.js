@@ -3,31 +3,31 @@
 function renderChart(elementID, title, yAxis, series) {
   Highcharts.chart(elementID, {
     chart: {
-      type: "line"
+      type: "line",
     },
     title: {
-      text: title
+      text: title,
     },
     yAxis: {
       title: {
-        text: yAxis
-      }
+        text: yAxis,
+      },
     },
     xAxis: {
       title: {
-        text: "Time (UTC)"
+        text: "Time (UTC)",
       },
       type: "datetime",
       labels: {
-        format: "{value:%Y-%m-%d<br>%H:%M}"
-      }
+        format: "{value:%Y-%m-%d<br>%H:%M}",
+      },
     },
     legend: {
       layout: "vertical",
       align: "right",
-      verticalAlign: "middle"
+      verticalAlign: "middle",
     },
-    series: series
+    series: series,
   });
 }
 
@@ -72,11 +72,13 @@ function inboundMetrics(droplets) {
       return bandwidthSeries(droplet["name"], data);
     });
   });
-  Promise.all(dropletMetrics).then((series) => {
-    renderChart("bandwidth-inbound", "Droplet Bandwidth (public, inbound)", "Bandwidth (Mbps)", series);
-  }).catch((error) => {
-    reportError("bandwidth-inbound", error);
-  });
+  Promise.all(dropletMetrics)
+    .then((series) => {
+      renderChart("bandwidth-inbound", "Droplet Bandwidth (public, inbound)", "Bandwidth (Mbps)", series);
+    })
+    .catch((error) => {
+      reportError("bandwidth-inbound", error);
+    });
 }
 
 function outboundMetrics(droplets) {
@@ -86,11 +88,13 @@ function outboundMetrics(droplets) {
       return bandwidthSeries(droplet["name"], data);
     });
   });
-  Promise.all(dropletMetrics).then((series) => {
-    renderChart("bandwidth-outbound", "Droplet Bandwidth (public, outbound)", "Bandwidth (Mbps)", series);
-  }).catch((error) => {
-    reportError("bandwidth-outbound", error);
-  });
+  Promise.all(dropletMetrics)
+    .then((series) => {
+      renderChart("bandwidth-outbound", "Droplet Bandwidth (public, outbound)", "Bandwidth (Mbps)", series);
+    })
+    .catch((error) => {
+      reportError("bandwidth-outbound", error);
+    });
 }
 
 function usedCpuSeries(dropletName, data) {
@@ -124,7 +128,7 @@ function usedCpuSeries(dropletName, data) {
     for (const metric of metrics.values()) {
       totalCpu = totalCpu + metric;
     }
-    const usedCpu = (totalCpu - idleCpu) / totalCpu * 100.0;
+    const usedCpu = ((totalCpu - idleCpu) / totalCpu) * 100.0;
     series.push([tick, usedCpu]);
   }
   return {
@@ -140,11 +144,13 @@ function cpuUsageMetrics(droplets) {
       return usedCpuSeries(droplet["name"], data);
     });
   });
-  Promise.all(dropletMetrics).then((series) => {
-    renderChart("cpu-usage", "CPU Usage", "Used %", series);
-  }).catch((error) => {
-    reportError("cpu-usage", error);
-  });
+  Promise.all(dropletMetrics)
+    .then((series) => {
+      renderChart("cpu-usage", "CPU Usage", "Used %", series);
+    })
+    .catch((error) => {
+      reportError("cpu-usage", error);
+    });
 }
 
 function usedMemorySeries(dropletName, freeData, totalData) {
@@ -156,12 +162,12 @@ function usedMemorySeries(dropletName, freeData, totalData) {
   }
   const freeValues = freeData["data"]["result"][0]["values"];
   const totalValues = totalData["data"]["result"][0]["values"];
-  const series = []
+  const series = [];
   for (let i = 0; i < freeValues.length; i++) {
     const tick = freeValues[i][0] * 1000;
     const freeMem = parseFloat(freeValues[i][1]);
     const totalMem = parseFloat(totalValues[i][1]);
-    const usedMem = (totalMem - freeMem) / totalMem * 100.0;
+    const usedMem = ((totalMem - freeMem) / totalMem) * 100.0;
     series.push([tick, usedMem]);
   }
   return {
@@ -178,18 +184,22 @@ function memoryUsageMetrics(droplets) {
       return usedMemorySeries(droplet["name"], data[0], data[1]);
     });
   });
-  Promise.all(dropletMetrics).then((series) => {
-    renderChart("memory-usage", "Memory Usage", "Used %", series);
-  }).catch((error) => {
-    reportError("memory-usage", error);
-  });
+  Promise.all(dropletMetrics)
+    .then((series) => {
+      renderChart("memory-usage", "Memory Usage", "Used %", series);
+    })
+    .catch((error) => {
+      reportError("memory-usage", error);
+    });
 }
 
-fetchJson("/data/droplets.json").then((droplets) => {
-  inboundMetrics(droplets);
-  outboundMetrics(droplets);
-  cpuUsageMetrics(droplets);
-  memoryUsageMetrics(droplets);
-}).catch((error) => {
-  reportError("container", error);
-});
+fetchJson("/data/droplets.json")
+  .then((droplets) => {
+    inboundMetrics(droplets);
+    outboundMetrics(droplets);
+    cpuUsageMetrics(droplets);
+    memoryUsageMetrics(droplets);
+  })
+  .catch((error) => {
+    reportError("container", error);
+  });
