@@ -47,12 +47,13 @@ function newSearchUnixTime(hours) {
 const searchEnd = newSearchUnixTime(0); // now
 const searchStart = newSearchUnixTime(1); // 1 hour ago
 
-function fetchJson(searchType, searchArg) {
+function searchJson(searchType, searchArg) {
   let searchUrl = "";
   const query = new URLSearchParams();
   switch (searchType) {
     case "droplets":
       query.set("tag_name", searchArg);
+      query.set("per_page", "200");
       searchUrl = "/v2/droplets";
       break;
     case "bandwidth-inbound":
@@ -122,7 +123,7 @@ function bandwidthSeries(dropletName, data) {
 
 function inboundMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    return fetchJson("bandwidth-inbound", droplet["id"]).then((data) => {
+    return searchJson("bandwidth-inbound", droplet["id"]).then((data) => {
       return bandwidthSeries(droplet["name"], data);
     });
   });
@@ -137,7 +138,7 @@ function inboundMetrics(droplets) {
 
 function outboundMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    return fetchJson("bandwidth-outbound", droplet["id"]).then((data) => {
+    return searchJson("bandwidth-outbound", droplet["id"]).then((data) => {
       return bandwidthSeries(droplet["name"], data);
     });
   });
@@ -192,7 +193,7 @@ function usedCpuSeries(dropletName, data) {
 
 function cpuUsageMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    return fetchJson("cpu-usage", droplet["id"]).then((data) => {
+    return searchJson("cpu-usage", droplet["id"]).then((data) => {
       return usedCpuSeries(droplet["name"], data);
     });
   });
@@ -230,8 +231,8 @@ function usedMemorySeries(dropletName, freeData, totalData) {
 
 function memoryUsageMetrics(droplets) {
   const dropletMetrics = droplets["droplets"].map((droplet) => {
-    const freeReq = fetchJson("memory-free", droplet["id"]);
-    const totalReq = fetchJson("memory-total", droplet["id"]);
+    const freeReq = searchJson("memory-free", droplet["id"]);
+    const totalReq = searchJson("memory-total", droplet["id"]);
     return Promise.all([freeReq, totalReq]).then((data) => {
       return usedMemorySeries(droplet["name"], data[0], data[1]);
     });
@@ -255,7 +256,7 @@ if (!!pageQuery) {
   refreshMinutes = !!refreshTxt ? parseInt(refreshTxt) : 0;
 }
 if (!!tagName) {
-  fetchJson("droplets", tagName)
+  searchJson("droplets", tagName)
     .then((droplets) => {
       inboundMetrics(droplets);
       outboundMetrics(droplets);
