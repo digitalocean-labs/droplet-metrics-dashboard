@@ -1,5 +1,5 @@
 bin
 data
-*.min.js
+public/vendor
 *.html
 *.md
