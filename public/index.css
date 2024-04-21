@@ -1,8 +1,32 @@
+#setup {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  text-align: center;
+}
+
+#setup.hidden,
+#setup label {
+  display: none;
+}
+
+#setup input,
+#setup select {
+  font-size: 1.1em;
+  margin: 0;
+  padding: 5px;
+  border-width: 1px;
+  box-sizing: content-box;
+  width: 300px;
+}
+
 #container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   grid-auto-rows: minmax(400px, auto);
+}
+
+#container.hidden {
+  display: none;
 }
 
 #bandwidth-inbound {

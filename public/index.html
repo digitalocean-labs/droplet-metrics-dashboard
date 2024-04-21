@@ -10,7 +10,30 @@
   <script src="/index.js" defer></script>
 </head>
 <body>
-<div id="container">
+<div id="setup" class="hidden">
+  <h1>Droplet Metrics</h1>
+  <form name="setup" method="get">
+    <p>
+      <label for="setup-tag">Droplet Tag Name</label>
+      <input id="setup-tag" name="tag" type="text" placeholder="Droplet Tag Name" maxlength="50" required autofocus>
+    </p>
+    <p>
+      <label for="setup-refresh">Refresh Interval</label>
+      <select id="setup-refresh" name="refresh">
+        <option value="0">Don't refresh metrics</option>
+        <option value="1">Refresh every 1 minute</option>
+        <option value="2">Refresh every 2 minutes</option>
+        <option value="3">Refresh every 3 minutes</option>
+        <option value="4">Refresh every 4 minutes</option>
+        <option value="5">Refresh every 5 minutes</option>
+      </select>
+    </p>
+    <p>
+      <input type="submit" value="Show Metrics">
+    </p>
+  </form>
+</div>
+<div id="container" class="hidden">
   <div id="bandwidth-inbound">Loading ...</div>
   <div id="bandwidth-outbound">Loading ...</div>
   <div id="cpu-usage">Loading ...</div>

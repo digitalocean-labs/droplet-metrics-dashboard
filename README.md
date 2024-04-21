@@ -12,7 +12,7 @@ export DIGITALOCEAN_TOKEN='[REDACTED]'
 ./serve.sh
 ```
 
-Navigate to http://localhost:3000/index.html?tag=YOUR_TAG to see metrics for droplets tagged with the given tag name.
+Navigate to http://localhost:3000/index.html to see metrics for droplets tagged with the given tag name. If required query parameters (see below) are not provided you will be presented with a form to set them up.
 
 Available query parameters:
 * `tag` applied to your droplets (MANDATORY)
