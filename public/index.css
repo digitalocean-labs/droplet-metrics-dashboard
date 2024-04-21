@@ -1,28 +1,10 @@
-#setup {
-  font-family: sans-serif;
-  text-align: center;
-}
-
 #setup.hidden,
 #setup label {
   display: none;
 }
 
-#setup input,
-#setup select {
-  font-size: 1.1em;
-  margin: 0;
-  padding: 5px;
-  width: 300px;
-}
-
-#setup select {
-  -webkit-appearance: menulist-button;
-}
-
-#setup button {
-  font-size: 1.1em;
-  padding: 5px;
+#setup-tag {
+  width: 200px;
 }
 
 #container {

@@ -5,21 +5,22 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Droplet Metrics</title>
+  <link rel="stylesheet" href="/vendor/spectre.min.css">
   <link rel="stylesheet" href="/index.css">
   <script src="/vendor/highcharts.min.js"></script>
   <script src="/index.js" defer></script>
 </head>
 <body>
-<div id="setup" class="hidden">
-  <h1>Droplet Metrics</h1>
+<div id="setup" class="container grid-sm hidden">
+  <h1 class="text-center">Droplet Metrics</h1>
   <form name="setup" method="get">
-    <p>
+    <div class="input-group">
       <label for="setup-tag">Droplet Tag Name</label>
-      <input id="setup-tag" name="tag" type="text" placeholder="Droplet Tag Name" maxlength="50" required autofocus>
-    </p>
-    <p>
+      <input id="setup-tag" name="tag" type="text" class="form-input"
+             placeholder="Droplet Tag Name (Required)" maxlength="50"
+             required autofocus>
       <label for="setup-refresh">Refresh Interval</label>
-      <select id="setup-refresh" name="refresh">
+      <select id="setup-refresh" name="refresh" class="form-select">
         <option value="0">Don't refresh graphs</option>
         <option value="1">Refresh every 1 minute</option>
         <option value="2">Refresh every 2 minutes</option>
@@ -27,10 +28,8 @@
         <option value="4">Refresh every 4 minutes</option>
         <option value="5">Refresh every 5 minutes</option>
       </select>
-    </p>
-    <p>
-      <button>Show Graphs</button>
-    </p>
+      <button class="btn btn-primary input-group-btn">Show Graphs</button>
+    </div>
   </form>
 </div>
 <div id="container" class="hidden">
