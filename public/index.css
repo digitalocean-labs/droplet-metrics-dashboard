@@ -18,6 +18,15 @@
   width: 300px;
 }
 
+#setup select {
+  -webkit-appearance: menulist-button;
+}
+
+#setup button {
+  font-size: 1.1em;
+  padding: 5px;
+}
+
 #container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
